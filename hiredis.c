@@ -772,6 +772,29 @@ redisContext *redisConnectFd(int fd) {
     return c;
 }
 
+int redisProxyAuth(redisContext *c, char *auth_str) {
+  int wdone = 0;
+  char buf[32];
+  u_int nread, nwritten;
+  /* Return early when the context has seen an error. */
+  if (c->err)
+    return REDIS_ERR;
+  nwritten = write(c->fd,auth_str,strlen(auth_str));
+  if (nwritten == -1) {
+    return REDIS_ERR_IO;
+  } else if (nwritten > 0) {
+    if (nwritten != strlen(auth_str)) {
+      return REDIS_ERR_IO;
+    }
+  }
+  /* read auth return from server */
+  nread = read(c->fd,buf,sizeof(buf));
+  if (!strcmp(buf, "AUTH OK") == 0) {
+    return REDIS_ERR;
+  }
+  return REDIS_OK;
+}
+
 /* Set read/write timeout on a blocking socket. */
 int redisSetTimeout(redisContext *c, const struct timeval tv) {
     if (c->flags & REDIS_BLOCK)

@@ -173,6 +173,11 @@ redisContext *redisConnectUnixNonBlock(const char *path);
 redisContext *redisConnectFd(int fd);
 
 /**
+ * For clients using nginx simple auth proxy:
+ * Auth through the proxy after client connection.
+*/
+int redisProxyAuth(redisContext *c, char *auth_str);
+/**
  * Reconnect the given context using the saved information.
  *
  * This re-uses the exact same connect options as in the initial connection.
